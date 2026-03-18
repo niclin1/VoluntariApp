@@ -5,6 +5,7 @@ async function status(req, res) {
   const updatedAt = new Date().toISOString();
   const databaseHealth = await database.query("SELECT version();");
   const databaseMaxConnections = await database.query("SHOW max_connections;");
+  // console.log(await database.query("SELECT * FROM "));
   const databaseConnectionsUsed = await database.query({
     text: "SELECT count(*)::int AS connections FROM pg_stat_activity WHERE datname = $1 AND backend_type = 'client backend';",
     values: [process.env.POSTGRES_DB],
