@@ -1,5 +1,6 @@
-import React from 'react';
-import { voluntario } from '../data';
+import React, { useEffect, useState } from 'react';
+import { Voluntario } from '../models/types';
+import { voluntario as initialVoluntario } from '../data';
 import { Divider } from '../components/UI';
 
 const categoryBg: Record<string, string> = {
@@ -10,6 +11,53 @@ const categoryBg: Record<string, string> = {
 };
 
 export default function ProfilePage() {
+    const [voluntario, setVoluntario] = useState<Voluntario>(initialVoluntario);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function loadVoluntario() {
+            try {
+                const res = await fetch('/api/v1/usuario');
+                if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+                const data: Voluntario = await res.json();
+                console.log('Loaded voluntario:', data);
+                setVoluntario(data[0]);
+            } catch (err) {
+                console.error('Failed to load voluntario:', err);
+                setError('Não foi possível carregar os dados do perfil.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadVoluntario();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="page page--cream">
+                <div className="container container--mid">
+                    <div className="heading-serif" style={{ fontSize: 22 }}>
+                        Carregando perfil...
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="page page--cream">
+                <div className="container container--mid">
+                    <div className="heading-serif" style={{ fontSize: 22 }}>
+                        {error}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="page page--cream">
             <div className="container container--mid profile-grid">
@@ -53,7 +101,7 @@ export default function ProfilePage() {
                         Histórico de voluntariado
                     </h2>
 
-                    {voluntario.historico.map(h => (
+                    {(voluntario.historico || []).map(h => (
                         <div key={h.id} className="card card--clickable profile-history-item mb-14" style={{ padding: '20px 24px' }}>
                             <div
                                 className="profile-history-icon"
@@ -83,9 +131,9 @@ export default function ProfilePage() {
                         <div className="label-upper mb-20">Resumo</div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
                             {[
-                                { num: voluntario.historico.length, label: 'Atividades' },
+                                { num: voluntario.historico?.length, label: 'Atividades' },
                                 { num: voluntario.totalHours, label: 'Horas totais' },
-                                { num: new Set(voluntario.historico.map(h => h.ong)).size, label: 'ONGs' },
+                                { num: new Set(voluntario.historico?.map(h => h.ong)).size, label: 'ONGs' },
                             ].map(s => (
                                 <div key={s.label} className="stat-box">
                                     <div className="stat-box__number" style={{ fontSize: 32 }}>
