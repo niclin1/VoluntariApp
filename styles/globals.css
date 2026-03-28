@@ -271,12 +271,19 @@ select {
 .profile-card-mini {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 10px;
   background: var(--green-900);
   border-radius: var(--radius);
   padding: 24px;
   color: white;
   text-align: center;
 }
+
+profile-card-mini__content {
+  margin-top: 12px;
+}
+
 
 .profile-card-mini__name {
   font-family: 'Lora', serif;

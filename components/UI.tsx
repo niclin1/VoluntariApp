@@ -185,3 +185,24 @@ export const Chip = ({
     {label}
   </button>
 );
+
+export const ProfileMini = ({ voluntario, fullname = false }: { voluntario: any, fullname?: boolean }) => {
+  return (
+    <div className="profile-card-mini">
+      <div className="profile-card-mini__header">
+        <Avatar initials={voluntario.initials} size={64} />
+      </div>
+      <div className="profile-card-mini__content">
+        <div className="profile-card-mini__name">
+          {fullname ? voluntario.name : voluntario.name.split(' ').slice(0, 2).join(' ')}
+        </div>
+        <div className="profile-card-mini__location">
+          📍 {voluntario.city}, {voluntario.state}
+        </div>
+        <div className="profile-card-mini__badge">
+          Voluntária desde {voluntario.memberSince}
+        </div>
+      </div >
+    </div >
+  );
+}

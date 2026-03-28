@@ -7,6 +7,7 @@ import { VagaCard } from '../../components/VagaCard';
 import { SectionHeader, Avatar } from '../../components/UI';
 import { Navbar } from '../../components/Navbar';
 import { Button } from 'antd';
+import { ProfileMini } from '../../components/UI';
 import styles from './style.module.css';
 
 const categories: (Category | 'Todas')[] = ['Todas', 'Educação', 'Saúde', 'Social', 'Meio Ambiente'];
@@ -69,19 +70,7 @@ export default function HomePage() {
                     <aside className={styles.sidebar}>
 
                         {/* Profile card */}
-                        <div className="profile-card-mini">
-                            <Avatar initials={voluntario.initials} size={64} />
-                            <div style={{ height: 12 }} />
-                            <div className="profile-card-mini__name">
-                                {voluntario.name.split(' ').slice(0, 2).join(' ')}
-                            </div>
-                            <div className="profile-card-mini__location">
-                                📍 {voluntario.city}, {voluntario.state}
-                            </div>
-                            <div className="profile-card-mini__badge">
-                                Voluntária desde {voluntario.memberSince}
-                            </div>
-                        </div>
+                        <ProfileMini voluntario={voluntario} />
                         {/* Stats */}
                         <div className="card" style={{ padding: 22 }}>
                             <div className="label-upper mb-16">Minhas horas</div>

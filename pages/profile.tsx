@@ -16,35 +16,35 @@ export default function ProfilePage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        async function loadVoluntario() {
-            try {
-                const res = await fetch('/api/v1/usuario');
-                if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-                const data: Voluntario = await res.json();
-                console.log('Loaded voluntario:', data);
-                setVoluntario(data[0]);
-            } catch (err) {
-                console.error('Failed to load voluntario:', err);
-                setError('Não foi possível carregar os dados do perfil.');
-            } finally {
-                setLoading(false);
-            }
-        }
+        // async function loadVoluntario() {
+        //     try {
+        //         const res = await fetch('/api/v1/usuario');
+        //         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        //         const data: Voluntario = await res.json();
+        //         console.log('Loaded voluntario:', data);
+        //         setVoluntario(data[0]);
+        //     } catch (err) {
+        //         console.error('Failed to load voluntario:', err);
+        //         setError('Não foi possível carregar os dados do perfil.');
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // }
 
-        loadVoluntario();
+        // loadVoluntario();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="page page--cream">
-                <div className="container container--mid">
-                    <div className="heading-serif" style={{ fontSize: 22 }}>
-                        Carregando perfil...
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="page page--cream">
+    //             <div className="container container--mid">
+    //                 <div className="heading-serif" style={{ fontSize: 22 }}>
+    //                     Carregando perfil...
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     if (error) {
         return (
