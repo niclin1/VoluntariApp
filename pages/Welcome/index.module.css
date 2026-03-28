@@ -1,0 +1,144 @@
+/* ── Welcome Page — Mobile First ──────────────────────────── */
+
+.welcome {
+  min-height: 100vh;
+  background: var(--green-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-h) + 24px) 20px 24px;
+}
+
+.welcome_inner {
+  text-align: center;
+  width: 100%;
+  max-width: 520px;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Emoji ── */
+.welcome_emoji {
+  display: flex;
+  justify-content: center;
+  font-size: 56px;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
+}
+
+/* ── Title ── */
+.welcome_title {
+  font-family: 'Lora', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+
+.welcome_highlight {
+  color: var(--green-300);
+  font-style: italic;
+}
+
+/* ── Subtitle ── */
+.welcome_subtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 36px;
+
+}
+
+/* ── Buttons ── */
+.welcome_actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.welcome_actions :global(.ant-btn) {
+  height: auto;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.welcome_actions :global(.ant-btn-primary) {
+  background: var(--green-500);
+  border-color: var(--green-500);
+  box-shadow: 0 4px 16px rgba(74, 138, 99, 0.35);
+}
+
+.welcome_actions :global(.ant-btn-primary:hover) {
+  background: var(--green-600) !important;
+  border-color: var(--green-600) !important;
+}
+
+.welcome_actions :global(.ant-btn-default) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.welcome_actions :global(.ant-btn-default:hover) {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: white !important;
+}
+
+/* ── Tablet (≥ 576px) ── */
+@media (min-width: 576px) {
+  .welcome_inner {
+    padding: 40px 24px;
+  }
+
+  .welcome_emoji {
+    font-size: 64px;
+    margin-bottom: 28px;
+  }
+
+  .welcome_title {
+    font-size: 42px;
+  }
+
+  .welcome_subtitle {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+/* ── Desktop (≥ 768px) ── */
+@media (min-width: 768px) {
+  .welcome {
+    padding-top: var(--nav-h);
+  }
+
+  .welcome_inner {
+    padding: 48px 32px;
+  }
+
+  .welcome_emoji {
+    font-size: 72px;
+    margin-bottom: 32px;
+  }
+
+  .welcome_title {
+    font-size: 52px;
+    margin-bottom: 16px;
+  }
+
+  .welcome_subtitle {
+    font-size: 17px;
+    margin-bottom: 48px;
+  }
+
+  .welcome_actions :global(.ant-btn) {
+    padding: 18px 28px;
+  }
+}
