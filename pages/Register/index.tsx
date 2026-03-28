@@ -3,13 +3,15 @@ import Link from 'next/link';
 import { Form, Input, Button } from 'antd';
 import { useRouter } from 'next/router';
 import styles from './style.module.css';
+import { useApp } from '../../context/AppContext';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { userType } = useApp();
 
     const onFinish = (values: any) => {
         console.log('Registration details:', values);
-        // Temporarily just redirecting to home upon registration submission
+
         router.push('/home');
     };
 
@@ -20,7 +22,9 @@ export default function RegisterPage() {
                     <div className={styles.auth_emoji}>🤝</div>
                     <h1 className={styles.auth_title}>Crie sua conta</h1>
                     <p className={styles.auth_subtitle}>
-                        Junte-se à nossa rede de voluntários
+                        {userType === "volunteer"
+                            ? "Junte-se à nossa rede de voluntários"
+                            : "Crie sua conta para gerenciar suas causas"}
                     </p>
                 </div>
 

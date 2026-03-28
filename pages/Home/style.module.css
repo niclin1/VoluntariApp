@@ -1,0 +1,62 @@
+/* ── Home Page — Mobile First ────────────────────────────── */
+/* 
+.container {
+  padding: 10px 10px;
+} */
+
+.home_grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  padding: 10px 10px;
+
+}
+
+.sidebar {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Custom Filter Pills (using Ant Design classes or Custom) ── */
+.filter_pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter_pill {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--white);
+  color: var(--gray-600);
+  border: 1.5px solid var(--gray-200);
+  font-family: inherit;
+}
+
+.filter_pill_active {
+  background: var(--green-700);
+  color: white;
+  border-color: var(--green-700);
+}
+
+.filter_pill:hover {
+  background: var(--green-50);
+}
+
+/* ── Tablet/Desktop (≥ 992px) ── */
+@media (min-width: 992px) {
+  .home_grid {
+    grid-template-columns: 1fr 320px;
+    align-items: start;
+  }
+
+  .sidebar {
+    display: flex;
+  }
+}

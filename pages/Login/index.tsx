@@ -3,13 +3,13 @@ import Link from 'next/link';
 import { Form, Input, Button } from 'antd';
 import { useRouter } from 'next/router';
 import styles from './style.module.css';
+import { useApp } from '../../context/AppContext';
 
 export default function LoginPage() {
     const router = useRouter();
-
+    const { userType } = useApp();
     const onFinish = (values: any) => {
         console.log('Login credentials:', values);
-        // Temporarily just redirecting to home upon login submission
         router.push('/home');
     };
 
@@ -20,7 +20,9 @@ export default function LoginPage() {
                     <div className={styles.auth_emoji}>🌱</div>
                     <h1 className={styles.auth_title}>Bem-vindo de volta</h1>
                     <p className={styles.auth_subtitle}>
-                        Entre para continuar transformando vidas
+                        {userType === "volunteer"
+                            ? "Entre para continuar transformando vidas"
+                            : "Entre para continuar gerenciando suas causas"}
                     </p>
                 </div>
 
