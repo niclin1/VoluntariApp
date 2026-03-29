@@ -1,16 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { useRouter } from 'next/router';
 import styles from './style.module.css';
 import { useApp } from '../../context/AppContext';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { userType } = useApp();
-    const onFinish = (values: any) => {
-        console.log('Login credentials:', values);
-        router.push('/home');
+    const { userType, setUserType, setCurrentUserRole } = useApp();
+    const [loading, setLoading] = useState(false);
+
+    const onFinish = async (values: any) => {
+        setLoading(true);
+        try {
+            if (userType === 'ong') {
+                // Mock Auth: Fetch ONGs and verify if email exists in DB
+                const response = await fetch('/api/v1/ong');
+                const ongs = await response.json();
+                const ongMatch = ongs.find((o: any) => o.email === values.email);
+
+                if (ongMatch) {
+                    message.success('Login bem-sucedido!');
+                    setCurrentUserRole('ong');
+                    router.push('/ong');
+                } else {
+                    message.error('E-mail não encontrado no sistema.');
+                }
+            } else {
+                // Volunteer Mock Auth
+                message.success('Login como voluntário!');
+                setCurrentUserRole('volunteer');
+                router.push('/Home');
+            }
+        } catch (error) {
+            message.error('Erro ao conectar ao servidor.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -19,6 +45,22 @@ export default function LoginPage() {
                 <div className={styles.auth_header}>
                     <div className={styles.auth_emoji}>🌱</div>
                     <h1 className={styles.auth_title}>Bem-vindo de volta</h1>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <Button 
+                            type={userType === 'volunteer' ? 'primary' : 'default'}
+                            onClick={() => setUserType('volunteer')}
+                        >
+                            Voluntário
+                        </Button>
+                        <Button 
+                            type={userType === 'ong' ? 'primary' : 'default'}
+                            onClick={() => setUserType('ong')}
+                        >
+                            ONG
+                        </Button>
+                    </div>
+
                     <p className={styles.auth_subtitle}>
                         {userType === "volunteer"
                             ? "Entre para continuar transformando vidas"
@@ -51,7 +93,7 @@ export default function LoginPage() {
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0 }}>
-                        <Button type="primary" htmlType="submit" block size="large">
+                        <Button type="primary" htmlType="submit" block size="large" loading={loading}>
                             Entrar →
                         </Button>
                     </Form.Item>

@@ -11,15 +11,14 @@ import styles from './Navbar.module.css';
 const navItems = [
     { href: '/', label: 'Boas-Vindas' },
     { href: '/Home', label: 'Home' },
-    { href: '/Vaga', label: 'Vaga' },
-    { href: '/Ong', label: 'ONG' },
-    { href: '/Form', label: 'Nova Vaga' },
-    { href: '/Profile', label: 'Perfil' },
+    { href: '/vaga', label: 'Vaga' },
+    { href: '/ong', label: 'ONG' },
+    { href: '/profile', label: 'Perfil' },
 ];
 
 export const Navbar = () => {
     const router = useRouter();
-    const { userType, setUserType } = useApp();
+    const { userType, setUserType, currentUserRole, setCurrentUserRole } = useApp();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     return (
@@ -44,23 +43,20 @@ export const Navbar = () => {
                     ))}
                 </div>
 
-                {/* Right Area - Desktop Only */}
-                {/* <div className={styles.navbar__right}>
-                    <div className={styles.navbar__toggle}>
-                        {(['volunteer', 'ong'] as const).map(t => (
-                            <button
-                                key={t}
-                                onClick={() => setUserType(t)}
-                                className={`${styles.navbar__toggle_btn} ${userType === t ? styles.navbar__toggle_btn__active : ''}`}
-                            >
-                                {t === 'volunteer' ? 'Voluntário' : 'ONG'}
-                            </button>
-                        ))}
-                    </div>
-                    <Link href="/profile" style={{ cursor: 'pointer' }}>
-                        <Avatar initials={voluntario.initials} size={36} />
-                    </Link>
-                </div> */}
+                {/* Right Area - Role Simulator Desktop */}
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
+                    <span style={{ fontSize: '12px', opacity: 0.8 }}>View as:</span>
+                    <select 
+                        value={currentUserRole} 
+                        onChange={(e) => setCurrentUserRole(e.target.value as any)}
+                        style={{ padding: '4px', borderRadius: '4px', background: 'var(--green-900)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+                    >
+                        <option value="guest">Guest</option>
+                        <option value="volunteer">Volunteer</option>
+                        <option value="ong">ONG</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
 
                 {/* Hamburger Button - Mobile Only */}
                 <Button
@@ -96,11 +92,27 @@ export const Navbar = () => {
                 </div>
 
 
-                {/* Mobile Profile Link */}
-                <Link href="/profile" className={styles.mobile_drawer_profile} onClick={() => setDrawerOpen(false)}>
-                    <Avatar initials={voluntario.initials} size={40} />
-                    <div className={styles.mobile_drawer_profile_name}>{voluntario.name}</div>
-                </Link>
+                {/* Mobile Profile Link & Role Simulator */}
+                <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
+                        <span style={{ fontSize: '14px', opacity: 0.8 }}>View as (Role):</span>
+                        <select 
+                            value={currentUserRole} 
+                            onChange={(e) => setCurrentUserRole(e.target.value as any)}
+                            style={{ flex: 1, padding: '8px', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+                        >
+                            <option value="guest" style={{ color: 'black' }}>Guest</option>
+                            <option value="volunteer" style={{ color: 'black' }}>Volunteer</option>
+                            <option value="ong" style={{ color: 'black' }}>ONG</option>
+                            <option value="admin" style={{ color: 'black' }}>Admin</option>
+                        </select>
+                    </div>
+                
+                    <Link href="/profile" className={styles.mobile_drawer_profile} onClick={() => setDrawerOpen(false)}>
+                        <Avatar initials={voluntario.initials} size={40} />
+                        <div className={styles.mobile_drawer_profile_name}>{voluntario.name}</div>
+                    </Link>
+                </div>
             </Drawer>
         </>
     );

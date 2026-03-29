@@ -1,18 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { useRouter } from 'next/router';
 import styles from './style.module.css';
 import { useApp } from '../../context/AppContext';
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { userType } = useApp();
+    const { userType, setUserType, setCurrentUserRole } = useApp();
+    const [loading, setLoading] = useState(false);
 
-    const onFinish = (values: any) => {
-        console.log('Registration details:', values);
+    const onFinish = async (values: any) => {
+        setLoading(true);
+        
+        try {
+            if (userType === 'ong') {
+                const response = await fetch('/api/v1/ong', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: values.name,
+                        email: values.email,
+                        localidade: values.localidade,
+                        telefone: values.telefone
+                    }),
+                });
 
-        router.push('/home');
+                const data = await response.json();
+
+                if (response.ok) {
+                    message.success('ONG cadastrada com sucesso!');
+                    setCurrentUserRole('ong'); // Provisional role assignment
+                    router.push('/ong');
+                } else {
+                    message.error(data.error || 'Erro ao cadastrar ONG');
+                }
+            } else {
+                // Future implementation of Volunteer Creation
+                console.log('Registration details:', values);
+                setCurrentUserRole('volunteer'); // Provisional role assignment
+                router.push('/Home');
+            }
+        } catch (error) {
+            message.error('Erro de conexão.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -21,6 +54,22 @@ export default function RegisterPage() {
                 <div className={styles.auth_header}>
                     <div className={styles.auth_emoji}>🤝</div>
                     <h1 className={styles.auth_title}>Crie sua conta</h1>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <Button 
+                            type={userType === 'volunteer' ? 'primary' : 'default'}
+                            onClick={() => setUserType('volunteer')}
+                        >
+                            Voluntário
+                        </Button>
+                        <Button 
+                            type={userType === 'ong' ? 'primary' : 'default'}
+                            onClick={() => setUserType('ong')}
+                        >
+                            ONG
+                        </Button>
+                    </div>
+
                     <p className={styles.auth_subtitle}>
                         {userType === "volunteer"
                             ? "Junte-se à nossa rede de voluntários"
@@ -52,6 +101,26 @@ export default function RegisterPage() {
                         <Input placeholder="seu@email.com" size="large" />
                     </Form.Item>
 
+                    {userType === 'ong' && (
+                        <>
+                            <Form.Item
+                                label="Localidade"
+                                name="localidade"
+                                rules={[{ required: true, message: 'Por favor, insira a localidade' }]}
+                            >
+                                <Input placeholder="Ex: São Paulo - SP" size="large" />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Telefone / WhatsApp"
+                                name="telefone"
+                                rules={[{ required: true, message: 'Por favor, insira o telefone' }]}
+                            >
+                                <Input placeholder="(11) 99999-9999" size="large" />
+                            </Form.Item>
+                        </>
+                    )}
+
                     <Form.Item
                         label="Senha"
                         name="password"
@@ -80,7 +149,7 @@ export default function RegisterPage() {
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0 }}>
-                        <Button type="primary" htmlType="submit" block size="large">
+                        <Button type="primary" htmlType="submit" block size="large" loading={loading}>
                             Registrar →
                         </Button>
                     </Form.Item>
