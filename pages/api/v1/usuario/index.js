@@ -7,14 +7,13 @@ import database from "infra/database";
 async function usuario(req, res) {
    // Configura o CORS
   res.setHeader('Access-Control-Allow-Origin', '*') // ou uma origem específica
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'DELETE, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
   // Responde ao preflight (requisição OPTIONS do browser)
   if (req.method === 'OPTIONS') {
     return res.status(200).end()
   }
-
   if (req.method === "GET") {
     try {
       const usuarios = await database.query({
@@ -121,8 +120,9 @@ async function usuario(req, res) {
     }
   }
 
-  res.setHeader("Allow", ["GET", "POST"]);
-  return res.status(405).end(`Method ${req.method} Not Allowed`);
+  // res.setHeader("Allow", ["GET", "POST"]);
+  // return res.status(405).end(`Method ${req.method} Not Allowed`);
+  return res.status(405).json({ error: `salve` });
 }
 
 export default usuario;
