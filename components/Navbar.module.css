@@ -7,6 +7,7 @@
   z-index: 100;
   background: var(--green-900);
   display: flex;
+  gap: 20px;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;

@@ -9,7 +9,6 @@ import { voluntario } from '../data';
 import styles from './Navbar.module.css';
 
 const navItems = [
-    { href: '/', label: 'Boas-Vindas' },
     { href: '/Home', label: 'Home' },
     { href: '/vaga', label: 'Vaga' },
     { href: '/ong', label: 'ONG' },
@@ -26,7 +25,11 @@ export const Navbar = () => {
             <nav className={styles.navbar}>
                 {/* Logo */}
                 <Link href="/" className={styles.navbar__logo}>
-                    <div className={styles.navbar__logo_icon}>🌱</div>
+                    <img
+                        src="/icon-transparent.png"
+                        alt="VoluntariApp Logo"
+                        style={{ width: '3.2em', height: '3.2em', objectFit: 'contain' }}
+                    />
                     <span className={styles.navbar__logo_text}>VoluntApp</span>
                 </Link>
 
@@ -46,8 +49,8 @@ export const Navbar = () => {
                 {/* Right Area - Role Simulator Desktop */}
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
                     <span style={{ fontSize: '12px', opacity: 0.8 }}>View as:</span>
-                    <select 
-                        value={currentUserRole} 
+                    <select
+                        value={currentUserRole}
                         onChange={(e) => setCurrentUserRole(e.target.value as any)}
                         style={{ padding: '4px', borderRadius: '4px', background: 'var(--green-900)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
                     >
@@ -96,8 +99,8 @@ export const Navbar = () => {
                 <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
                         <span style={{ fontSize: '14px', opacity: 0.8 }}>View as (Role):</span>
-                        <select 
-                            value={currentUserRole} 
+                        <select
+                            value={currentUserRole}
                             onChange={(e) => setCurrentUserRole(e.target.value as any)}
                             style={{ flex: 1, padding: '8px', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
                         >
@@ -107,7 +110,7 @@ export const Navbar = () => {
                             <option value="admin" style={{ color: 'black' }}>Admin</option>
                         </select>
                     </div>
-                
+
                     <Link href="/profile" className={styles.mobile_drawer_profile} onClick={() => setDrawerOpen(false)}>
                         <Avatar initials={voluntario.initials} size={40} />
                         <div className={styles.mobile_drawer_profile_name}>{voluntario.name}</div>

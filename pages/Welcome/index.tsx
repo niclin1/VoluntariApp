@@ -12,7 +12,13 @@ export default function WelcomePage() {
     return (
         <div className={styles.welcome}>
             <div className={styles.welcome_inner}>
-                <div className={styles.welcome_emoji}>🌿</div>
+                <div className={styles.welcome_emoji}>
+                    <img
+                        src="/icon-transparent.png"
+                        alt="VoluntariApp Logo"
+                        style={{ width: '5.2em', height: '5.2em', objectFit: 'contain' }}
+                    />
+                </div>
 
                 <Title level={1} className={styles.welcome_title}>
                     Transforme seu{' '}

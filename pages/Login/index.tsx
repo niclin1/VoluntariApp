@@ -28,12 +28,24 @@ export default function LoginPage() {
                 }
             } else {
                 // Volunteer Mock Auth
+
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(values),
+                });
+                if (!response.ok) {
+                    throw new Error('Login failed')
+                }
                 message.success('Login como voluntário!');
                 setCurrentUserRole('volunteer');
                 router.push('/Home');
             }
         } catch (error) {
-            message.error('Erro ao conectar ao servidor.');
+            message.error('Erro ao conectar ao servidor. ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -47,13 +59,13 @@ export default function LoginPage() {
                     <h1 className={styles.auth_title}>Bem-vindo de volta</h1>
 
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <Button 
+                        <Button
                             type={userType === 'volunteer' ? 'primary' : 'default'}
                             onClick={() => setUserType('volunteer')}
                         >
                             Voluntário
                         </Button>
-                        <Button 
+                        <Button
                             type={userType === 'ong' ? 'primary' : 'default'}
                             onClick={() => setUserType('ong')}
                         >
