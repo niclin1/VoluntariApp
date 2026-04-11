@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Button, Drawer } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
+import { Button, Drawer, message } from 'antd';
+import { MenuOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useApp } from '../context/AppContext';
 import { Avatar } from './UI';
 import { voluntario } from '../data';
@@ -10,8 +10,8 @@ import styles from './Navbar.module.css';
 
 const navItems = [
     { href: '/Home', label: 'Home' },
-    { href: '/vaga', label: 'Vaga' },
-    { href: '/ong', label: 'ONG' },
+    { href: '/form', label: 'Criar Vaga' },
+    { href: '/ong', label: 'Dashboard ONG' },
     { href: '/profile', label: 'Perfil' },
 ];
 
@@ -19,6 +19,29 @@ export const Navbar = () => {
     const router = useRouter();
     const { userType, setUserType, currentUserRole, setCurrentUserRole } = useApp();
     const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/v1/auth/logout', { method: 'POST' });
+            setCurrentUserRole('guest');
+            // reset specific states if necessary, or just force route
+            message.success('Você saiu com sucesso, volte sempre!');
+            router.push('/Login');
+        } catch (error) {
+            message.error('Erro ao encerrar sessão.');
+        }
+    };
+
+    // Filter nav items based on user role
+    const filteredNavItems = navItems.filter(item => {
+        if (currentUserRole === 'ong' || currentUserRole === 'admin') {
+            // ONGs should not see the Volunteer-specific "Perfil" page
+            return item.href !== '/profile';
+        } else {
+            // Volunteers and guests should not see ONG-specific dashboards/forms forms
+            return item.href !== '/ong' && item.href !== '/form';
+        }
+    });
 
     return (
         <>
@@ -35,7 +58,7 @@ export const Navbar = () => {
 
                 {/* Tabs - Desktop Only */}
                 <div className={styles.navbar__tabs}>
-                    {navItems.map(item => (
+                    {filteredNavItems.map(item => (
                         <Link
                             key={item.href}
                             href={item.href}
@@ -44,21 +67,20 @@ export const Navbar = () => {
                             {item.label}
                         </Link>
                     ))}
-                </div>
 
-                {/* Right Area - Role Simulator Desktop */}
-                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
-                    <span style={{ fontSize: '12px', opacity: 0.8 }}>View as:</span>
-                    <select
-                        value={currentUserRole}
-                        onChange={(e) => setCurrentUserRole(e.target.value as any)}
-                        style={{ padding: '4px', borderRadius: '4px', background: 'var(--green-900)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
-                    >
-                        <option value="guest">Guest</option>
-                        <option value="volunteer">Volunteer</option>
-                        <option value="ong">ONG</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                    {/* Sair / Logout Desktop */}
+                    {currentUserRole !== 'guest' && (
+                        <button 
+                            className={`${styles.navbar__tab} ${styles.navbar__tab_logout} flex items-center gap-4`} 
+                            onClick={handleLogout}
+                            style={{ 
+                                background: 'transparent', border: 'none', cursor: 'pointer',
+                                color: 'rgba(255,255,255,0.7)', marginLeft: '16px'
+                            }}
+                        >
+                            <LogoutOutlined /> Sair
+                        </button>
+                    )}
                 </div>
 
                 {/* Hamburger Button - Mobile Only */}
@@ -82,7 +104,7 @@ export const Navbar = () => {
                 }}
             >
                 <div className={styles.mobile_drawer_links}>
-                    {navItems.map(item => (
+                    {filteredNavItems.map(item => (
                         <Link
                             key={item.href}
                             href={item.href}
@@ -92,30 +114,33 @@ export const Navbar = () => {
                             {item.label}
                         </Link>
                     ))}
-                </div>
 
-
-                {/* Mobile Profile Link & Role Simulator */}
-                <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
-                        <span style={{ fontSize: '14px', opacity: 0.8 }}>View as (Role):</span>
-                        <select
-                            value={currentUserRole}
-                            onChange={(e) => setCurrentUserRole(e.target.value as any)}
-                            style={{ flex: 1, padding: '8px', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+                    {/* Sair / Logout Mobile */}
+                    {currentUserRole !== 'guest' && (
+                        <button 
+                            className={styles.mobile_drawer_link} 
+                            onClick={() => {
+                                setDrawerOpen(false);
+                                handleLogout();
+                            }}
+                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'rgba(255,200,200,1)' }}
                         >
-                            <option value="guest" style={{ color: 'black' }}>Guest</option>
-                            <option value="volunteer" style={{ color: 'black' }}>Volunteer</option>
-                            <option value="ong" style={{ color: 'black' }}>ONG</option>
-                            <option value="admin" style={{ color: 'black' }}>Admin</option>
-                        </select>
-                    </div>
-
-                    <Link href="/profile" className={styles.mobile_drawer_profile} onClick={() => setDrawerOpen(false)}>
-                        <Avatar initials={voluntario.initials} size={40} />
-                        <div className={styles.mobile_drawer_profile_name}>{voluntario.name}</div>
-                    </Link>
+                            <LogoutOutlined /> Sair da conta
+                        </button>
+                    )}
                 </div>
+
+
+                {/* Mobile Profile Link */}
+                {currentUserRole !== 'ong' && currentUserRole !== 'admin' && (
+                    <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                        <Link href="/profile" className={styles.mobile_drawer_profile} onClick={() => setDrawerOpen(false)}>
+                            <Avatar initials={voluntario.initials} size={40} />
+                            <div className={styles.mobile_drawer_profile_name}>{voluntario.name}</div>
+                        </Link>
+                    </div>
+                )}
             </Drawer>
         </>
     );

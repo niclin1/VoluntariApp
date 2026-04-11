@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Vaga } from '../models/types';
 
 export type UserRole = 'admin' | 'ong' | 'volunteer' | 'guest';
@@ -8,23 +8,48 @@ interface AppContextType {
   setSelectedVaga: (v: Vaga | null) => void;
   userType: 'volunteer' | 'ong';
   setUserType: (t: 'volunteer' | 'ong') => void;
-  // Provisional implementation for Auth Roles
   currentUserRole: UserRole;
   setCurrentUserRole: (role: UserRole) => void;
+  currentUser: any; // Ideally we type this strongly later
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [selectedVaga, setSelectedVaga] = useState<Vaga | null>(null);
-  const [userType, setUserType] = useState<'volunteer' | 'ong'>('volunteer');
-  const [currentUserRole, setCurrentUserRole] = useState<UserRole>('guest');
+  const [userType, setUserType] = useState<'volunteer' | 'ong'>('volunteer');   
+  const [currentUserRole, setCurrentUserRole] = useState<UserRole>('guest');    
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Initialize actual Auth Status
+  useEffect(() => {
+    let isMounted = true;
+    const loadSession = async () => {
+      try {
+        const response = await fetch('/api/v1/auth/me');
+        if (response.ok) {
+          const user = await response.json();
+          if (isMounted) {
+            setCurrentUser(user);
+            setCurrentUserRole(user.role as UserRole);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load session:', err);
+      }
+    };
+    loadSession();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <AppContext.Provider value={{ 
-      selectedVaga, setSelectedVaga, 
+    <AppContext.Provider value={{
+      selectedVaga, setSelectedVaga,
       userType, setUserType,
-      currentUserRole, setCurrentUserRole
+      currentUserRole, setCurrentUserRole,
+      currentUser
     }}>
       {children}
     </AppContext.Provider>

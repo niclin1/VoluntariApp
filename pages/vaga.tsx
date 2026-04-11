@@ -5,11 +5,86 @@ import { useApp } from '../context/AppContext';
 import { vagas } from '../data';
 import { CategoryTag, ModalityTag } from '../components/UI';
 import { Navbar } from '../components/Navbar';
+import { Spin, message } from 'antd';
+import { useState, useEffect } from 'react';
+import { Vaga, Category } from '../models/types';
 
 export default function VagaPage() {
     const router = useRouter();
+    const { id } = router.query;
     const { selectedVaga } = useApp();
-    const vaga = selectedVaga ?? vagas[0];
+    const [fetchedVaga, setFetchedVaga] = useState<Vaga | null>(null);
+    const [loading, setLoading] = useState(true);
+    const vaga = selectedVaga || fetchedVaga || vagas[0];
+    const [applying, setApplying] = useState(false);
+
+    useEffect(() => {
+        if (selectedVaga) {
+            setLoading(false);
+            return;
+        }
+        if (!id) return;
+
+        const loadVaga = async () => {
+            try {
+                const res = await fetch(`/api/v1/trabalho?id=${id}`);
+                const data = await res.json();
+                if (res.ok && data.length > 0) {
+                    const t = data[0];
+                    setFetchedVaga({
+                        id: t.id.toString(),
+                        title: t.titulo,
+                        ong: t.ong_nome || 'ONG Parceira',
+                        city: t.ong_city || 'Remoto/Local',
+                        category: (t.categoria?.trim() as Category) || 'Social',
+                        modality: 'Híbrido',
+                        availability: t.disponibilidade,
+                        hoursPerWeek: t.carga_horaria.toString(),
+                        totalSlots: t.n_vagas,
+                        filledSlots: 0,
+                        startDate: new Date(t.criado_em).toLocaleDateString('pt-BR'),
+                        description: t.descricao,
+                        requirements: [],
+                        icon: t.categoria === 'Educação' ? '📚' : t.categoria === 'Saúde' ? '💚' : t.categoria === 'Meio Ambiente' ? '🌱' : '🤝',
+                        status: 'Ativa',
+                        ongEmail: t.ong_email,
+                        ongPhone: t.ong_phone,
+                        ongSince: t.ong_since ? new Date(t.ong_since).getFullYear().toString() : '2023',
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load vaga', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadVaga();
+    }, [id, selectedVaga]);
+
+    const handleApply = async () => {
+        if (!vaga) return;
+        setApplying(true);
+        try {
+            const res = await fetch('/api/v1/trabalho/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trabalho_id: parseInt(vaga.id) })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                message.success('Inscrição realizada com sucesso!');
+                router.push('/profile');
+            } else {
+                message.error(data.error || 'Erro ao realizar inscrição.');
+            }
+        } catch (error) {
+            console.error('Apply error:', error);
+            message.error('Erro de conexão ao tentar se inscrever.');
+        } finally {
+            setApplying(false);
+        }
+    };
 
     return (
         <>
@@ -96,8 +171,13 @@ export default function VagaPage() {
                                 {vaga.totalSlots - vaga.filledSlots} vagas disponíveis · Resposta em até 48h
                             </div>
 
-                            <button className="btn btn--primary btn--full mb-12" style={{ padding: 16, fontSize: 15 }}>
-                                Quero me voluntariar →
+                            <button 
+                                className={`btn btn--primary btn--full mb-12 ${applying ? 'loading' : ''}`} 
+                                style={{ padding: 16, fontSize: 15 }}
+                                onClick={handleApply}
+                                disabled={applying}
+                            >
+                                {applying ? <Spin /> : 'Quero me voluntariar →'}
                             </button>
 
                             <button className="btn btn--outline btn--full" style={{ padding: 14, fontSize: 14, fontWeight: 600 }}>
@@ -131,7 +211,15 @@ export default function VagaPage() {
                                 </div>
                             </div>
                             <div style={{ fontSize: 13, color: 'var(--gray-600)', lineHeight: 1.6 }}>
-                                Organização sem fins lucrativos dedicada à transformação social através da educação e do voluntariado.
+                                {vaga.ongEmail ? (
+                                    <>
+                                        <p style={{ margin: '0 0 8px 0' }}>📧 {vaga.ongEmail}</p>
+                                        <p style={{ margin: '0 0 8px 0' }}>📞 {vaga.ongPhone}</p>
+                                        <p style={{ margin: 0 }}>Associada desde {vaga.ongSince}</p>
+                                    </>
+                                ) : (
+                                    'Organização dedicada à transformação social através da educação e do voluntariado.'
+                                )}
                             </div>
                         </div>
                     </div>

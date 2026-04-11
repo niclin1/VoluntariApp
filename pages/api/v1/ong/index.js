@@ -44,9 +44,67 @@ export default async function ong(req, res) {
     } catch (error) {
       console.error("Error creating ong:", error);
       if (error.code === '23505') { // Unique violation
-        return res.status(409).json({ error: "Já existe uma ONG com este email." });
+        return res.status(409).json({ error: "Já existe uma ONG com este email." });                                                                                 }
+      return res.status(500).json({ error: "Erro interno no servidor." });      
+    }
+  }
+
+  // PUT: Atualizar os dados de uma ONG
+  if (req.method === "PUT") {
+    const { id, nome, localidade, telefone } = req.body ?? {};
+
+    if (!id || !nome || !localidade || !telefone) {
+      return res.status(400).json({ error: "Os campos id, nome, localidade e telefone são obrigatórios." });
+    }
+
+    try {
+      const updated = await database.query({
+        text: `
+          UPDATE ongs
+          SET nome = $1, localidade = $2, telefone = $3
+          WHERE id = $4
+          RETURNING id, nome, localidade, email, telefone, criado_em
+        `,
+        values: [nome, localidade, telefone, id]
+      });
+
+      const updatedOng = updated.rows ? updated.rows[0] : updated[0];
+
+      if (!updatedOng) {
+        return res.status(404).json({ error: "ONG não encontrada." });
       }
+
+      return res.status(200).json(updatedOng);
+    } catch (error) {
+      console.error("Error updating ong:", error);
       return res.status(500).json({ error: "Erro interno no servidor." });
+    }
+  }
+
+  // DELETE: Remover uma ONG
+  if (req.method === "DELETE") {
+    const { id } = req.query ?? {};
+
+    if (!id) {
+      return res.status(400).json({ error: "ID da ONG é obrigatório para deletar." });
+    }
+
+    try {
+      const deleted = await database.query({
+        text: `DELETE FROM ongs WHERE id = $1 RETURNING id`,
+        values: [id]
+      });
+
+      const deletedOng = deleted.rows ? deleted.rows[0] : deleted[0];
+
+      if (!deletedOng) {
+        return res.status(404).json({ error: "ONG não encontrada." });
+      }
+
+      return res.status(200).json({ message: "ONG removida com sucesso." });
+    } catch (error) {
+      console.error("Error deleting ong:", error);
+      return res.status(500).json({ error: "Erro interno no servidor ao tentar deletar a ONG." });
     }
   }
 

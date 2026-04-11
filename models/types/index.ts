@@ -21,6 +21,10 @@ export interface Vaga {
   requirements: string[];
   icon: string;
   status: VagaStatus;
+  ongEmail?: string;
+  ongPhone?: string;
+  ongCity?: string;
+  ongSince?: string;
 }
 
 export interface HistoricoItem {

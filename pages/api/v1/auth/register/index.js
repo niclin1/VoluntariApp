@@ -68,19 +68,24 @@ export default async function handler(req, res) {
         interestArea || "Não informado",
         availability || "Não informado",
         modality || "Não informado",
-        'volunteer', // default role
+        req.body.role === 'ong' ? 'ong' : 'volunteer', // Use front-end override if passed!
         0,
       ],
     });
 
-    const newUser = newUserResult[0];
+    const newUser = newUserResult[0]; // If database.query returns the array directly
 
     // Generate JWT token
-    const token = generateToken({
+    const token = await generateToken({ // Must await! generateToken is async using jose natively!
       id: newUser.id,
       email: newUser.email,
       role: newUser.role,
     });
+    
+    // Auto-login the user inside Registration by configuring the cookie!
+    res.setHeader('Set-Cookie',
+        `token=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_EXPIRATION_NUMBER}; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`
+    );
 
     return res.status(201).json({
       message: 'User registered successfully',

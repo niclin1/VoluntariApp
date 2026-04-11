@@ -13,39 +13,35 @@ export default function LoginPage() {
     const onFinish = async (values: any) => {
         setLoading(true);
         try {
-            if (userType === 'ong') {
-                // Mock Auth: Fetch ONGs and verify if email exists in DB
-                const response = await fetch('/api/v1/ong');
-                const ongs = await response.json();
-                const ongMatch = ongs.find((o: any) => o.email === values.email);
+            const response = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            });
 
-                if (ongMatch) {
-                    message.success('Login bem-sucedido!');
-                    setCurrentUserRole('ong');
-                    router.push('/ong');
-                } else {
-                    message.error('E-mail não encontrado no sistema.');
-                }
+            if (!response.ok) {
+                const errorData = await response.json();
+                message.error(errorData.error || 'Falha no login');
+                return;
+            }
+
+            const data = await response.json();
+            message.success('Login bem-sucedido!');
+            
+            // Set AppContext state using the actual JWT extracted user Role
+            setCurrentUserRole(data.user.role as any);
+            
+            // Redirect correctly based on the role the db returned to us
+            if (data.user.role === 'ong' || data.user.role === 'admin') {
+                router.push('/ong');
             } else {
-                // Volunteer Mock Auth
-
-                const response = await fetch('/api/v1/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(values),
-                });
-                if (!response.ok) {
-                    throw new Error('Login failed')
-                }
-                message.success('Login como voluntário!');
-                setCurrentUserRole('volunteer');
                 router.push('/Home');
             }
-        } catch (error) {
-            message.error('Erro ao conectar ao servidor. ' + error.message);
+
+        } catch (error: any) {
+            message.error('Erro ao conectar ao servidor.');    
         } finally {
             setLoading(false);
         }

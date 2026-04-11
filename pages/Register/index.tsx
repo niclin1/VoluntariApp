@@ -12,37 +12,61 @@ export default function RegisterPage() {
 
     const onFinish = async (values: any) => {
         setLoading(true);
-        
+
         try {
+            // First, register generic "Usuario" Auth
+            const userResponse = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: values.nome,
+                    email: values.email,
+                    password: values.password,
+                    city: values.localidade || "Não informado",
+                    state: "SP", // Hardcoded proxy for now, ideally user inputs state
+                    interestArea: "Outros",
+                    availability: "Integral",
+                    modality: "Remoto",
+                    role: userType // Pass the correct role from the switcher!
+                }),
+            });
+
+            if (!userResponse.ok) {
+                const data = await userResponse.json();
+                message.error(data.error || 'Erro ao registrar usuário');       
+                setLoading(false);
+                return;
+            }
+
+            const userData = await userResponse.json();
+
+            // Then if it's an ONG, ALSO register their specific ONG details
             if (userType === 'ong') {
-                const response = await fetch('/api/v1/ong', {
+                const ongResponse = await fetch('/api/v1/ong', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        nome: values.name,
+                        nome: values.nome,
                         email: values.email,
-                        localidade: values.localidade,
-                        telefone: values.telefone
+                        localidade: values.localidade || "Não informado",
+                        telefone: values.telefone || "000000000"
                     }),
                 });
 
-                const data = await response.json();
+                const ongData = await ongResponse.json();
 
-                if (response.ok) {
-                    message.success('ONG cadastrada com sucesso!');
-                    setCurrentUserRole('ong'); // Provisional role assignment
-                    router.push('/ong');
-                } else {
-                    message.error(data.error || 'Erro ao cadastrar ONG');
+                if (!ongResponse.ok) {
+                    message.error(ongData.error || 'Autenticado, mas falha ao cadastrar detalhes da ONG');       
+                    return;
                 }
-            } else {
-                // Future implementation of Volunteer Creation
-                console.log('Registration details:', values);
-                setCurrentUserRole('volunteer'); // Provisional role assignment
-                router.push('/Home');
             }
+            
+            message.success('Cadastro realizado com sucesso!');
+            setCurrentUserRole(userType); 
+            router.push(userType === 'ong' ? '/ong' : '/Home');
+            
         } catch (error) {
-            message.error('Erro de conexão.');
+            message.error('Erro de conexão ao registrar.');
         } finally {
             setLoading(false);
         }
@@ -52,17 +76,17 @@ export default function RegisterPage() {
         <div className={styles.auth_wrapper}>
             <div className={styles.auth_card}>
                 <div className={styles.auth_header}>
-                    <div className={styles.auth_emoji}>🤝</div>
-                    <h1 className={styles.auth_title}>Crie sua conta</h1>
-                    
+                    <div className={styles.auth_emoji}>🌱</div>
+                    <h1 className={styles.auth_title}>Criar uma conta</h1>
+
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <Button 
+                        <Button
                             type={userType === 'volunteer' ? 'primary' : 'default'}
                             onClick={() => setUserType('volunteer')}
                         >
                             Voluntário
                         </Button>
-                        <Button 
+                        <Button
                             type={userType === 'ong' ? 'primary' : 'default'}
                             onClick={() => setUserType('ong')}
                         >
@@ -72,30 +96,26 @@ export default function RegisterPage() {
 
                     <p className={styles.auth_subtitle}>
                         {userType === "volunteer"
-                            ? "Junte-se à nossa rede de voluntários"
-                            : "Crie sua conta para gerenciar suas causas"}
+                            ? "Faça parte de uma comunidade que transforma!"
+                            : "Encontre os melhores voluntários para sua causa!"}
                     </p>
                 </div>
 
-                <Form
-                    layout="vertical"
-                    onFinish={onFinish}
-                    requiredMark={false}
-                >
+                <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
                     <Form.Item
-                        label="Nome Completo"
-                        name="name"
-                        rules={[{ required: true, message: 'Por favor, insira seu nome' }]}
+                        label="Nome"
+                        name="nome"
+                        rules={[{ required: true, message: 'Insira seu nome/nome da ONG' }]}
                     >
-                        <Input placeholder="Seu nome" size="large" />
+                        <Input placeholder="Nome completo" size="large" />
                     </Form.Item>
 
                     <Form.Item
                         label="E-mail"
                         name="email"
                         rules={[
-                            { required: true, message: 'Por favor, insira seu e-mail' },
-                            { type: 'email', message: 'Insira um e-mail válido' },
+                            { required: true, message: 'Insira seu e-mail' },
+                            { type: 'email', message: 'E-mail inválido' }
                         ]}
                     >
                         <Input placeholder="seu@email.com" size="large" />
@@ -104,19 +124,19 @@ export default function RegisterPage() {
                     {userType === 'ong' && (
                         <>
                             <Form.Item
-                                label="Localidade"
-                                name="localidade"
-                                rules={[{ required: true, message: 'Por favor, insira a localidade' }]}
+                                label="Telefone"
+                                name="telefone"
+                                rules={[{ required: true, message: 'Insira um telefone para a ONG' }]}
                             >
-                                <Input placeholder="Ex: São Paulo - SP" size="large" />
+                                <Input placeholder="(11) 99999-9999" size="large" />
                             </Form.Item>
 
                             <Form.Item
-                                label="Telefone / WhatsApp"
-                                name="telefone"
-                                rules={[{ required: true, message: 'Por favor, insira o telefone' }]}
+                                label="Endereço / Localidade"
+                                name="localidade"
+                                rules={[{ required: true, message: 'Insira uma localidade para seus eventos' }]}
                             >
-                                <Input placeholder="(11) 99999-9999" size="large" />
+                                <Input placeholder="Av. Paulista, 1200 - São Paulo" size="large" />
                             </Form.Item>
                         </>
                     )}
@@ -124,33 +144,14 @@ export default function RegisterPage() {
                     <Form.Item
                         label="Senha"
                         name="password"
-                        rules={[{ required: true, message: 'Por favor, insira sua senha' }]}
-                    >
-                        <Input.Password placeholder="••••••••" size="large" />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Confirmar Senha"
-                        name="confirmPassword"
-                        dependencies={['password']}
-                        rules={[
-                            { required: true, message: 'Por favor, confirme sua senha' },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('As senhas não coincidem!'));
-                                },
-                            }),
-                        ]}
+                        rules={[{ required: true, message: 'Crie uma senha de no mínimo 6 caracteres', min: 6 }]}
                     >
                         <Input.Password placeholder="••••••••" size="large" />
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0 }}>
                         <Button type="primary" htmlType="submit" block size="large" loading={loading}>
-                            Registrar →
+                            Criar Conta →
                         </Button>
                     </Form.Item>
                 </Form>

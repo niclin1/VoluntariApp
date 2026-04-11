@@ -17,10 +17,11 @@ const categoryEmoji: Record<Category, string> = {
 };
 
 export const CategoryTag = ({ category }: { category: Category }) => {
-  const style = categoryStyles[category];
+  const style = categoryStyles[category] || { bg: 'var(--gray-200)', color: 'var(--gray-700)' };
+  const emoji = categoryEmoji[category] || '📌';
   return (
     <span className="tag" style={{ background: style.bg, color: style.color }}>
-      {categoryEmoji[category]} {category}
+      {emoji} {category || 'Geral'}
     </span>
   );
 };
